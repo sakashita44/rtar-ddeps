@@ -5,10 +5,6 @@ NonEmptyListOfStrings = All([str], Length(min=1))
 PossiblyEmptyListOfStrings = [str]
 NonEmptyString = All(str, Length(min=1))
 
-# --- 推奨される Format 文字列 ---
-# Validator で使用される可能性があるため残す
-RECOMMENDED_FORMATS = ["table", "single", "time_series", "image", "video", "audio", "text", "binary"]
-
 # --- カラムスキーマ ---
 ColumnSchema = Schema({
     Required('name'): NonEmptyString,

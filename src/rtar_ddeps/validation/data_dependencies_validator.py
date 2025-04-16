@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Set, Tuple # List は型ヒント用に残�
 from voluptuous import MultipleInvalid
 
 from .base_validator import BaseValidator
-from .schemas.data_dependencies_schema import DataDependenciesSchema, RECOMMENDED_FORMATS
+from .schemas.data_dependencies_schema import DataDependenciesSchema
 
 class DataDependenciesValidator(BaseValidator):
     """
@@ -177,11 +177,6 @@ class DataDependenciesValidator(BaseValidator):
                 self._add_warning("`required_data` list is empty. If there are no dependencies, consider removing the key.", path_base + ['required_data'])
             if 'required_parameter' in data_def and isinstance(data_def['required_parameter'], list) and not data_def['required_parameter']:
                 self._add_warning("`required_parameter` list is empty. If there are no dependencies, consider removing the key.", path_base + ['required_parameter'])
-
-            # format の推奨値チェック
-            fmt = data_def.get('format')
-            if isinstance(fmt, str) and fmt not in RECOMMENDED_FORMATS:
-                 self._add_warning(f"Format '{fmt}' is not in the recommended list: {RECOMMENDED_FORMATS}. Ensure this format is intended.", path_base + ['format'])
 
         # parameter の空リストチェック
         if isinstance(param_section, dict):

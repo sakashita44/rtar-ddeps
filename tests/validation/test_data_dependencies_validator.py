@@ -2,7 +2,6 @@ import pytest
 from pathlib import Path
 
 from rtar_ddeps.validation.data_dependencies_validator import DataDependenciesValidator
-from rtar_ddeps.validation.schemas.data_dependencies_schema import RECOMMENDED_FORMATS # 警告テスト用
 
 # テストデータのディレクトリ
 # このテストファイルからの相対パスで指定
@@ -28,7 +27,6 @@ def error_file(request):
 
 @pytest.fixture(params=[
     "warning_empty_recommended.yml",
-    "warning_unexpected_format.yml",
 ])
 def warning_file(request):
     """警告を含むテストファイルパスをパラメータ化して提供するフィクスチャ"""
@@ -158,14 +156,3 @@ def test_warning_empty_recommended_details():
     assert "Warning at 'data.data_b.required_data': `required_data` list is empty. If there are no dependencies, consider removing the key." in warnings
     assert "Warning at 'data.data_b.required_parameter': `required_parameter` list is empty. If there are no dependencies, consider removing the key." in warnings
     assert "Warning at 'parameter.param1.descriptions': `descriptions` list is empty. Consider adding a description." in warnings
-
-def test_warning_unexpected_format_details():
-    """想定外フォーマット警告の詳細チェック"""
-    file_path = TEST_DATA_DIR / "warning_unexpected_format.yml"
-    validator = DataDependenciesValidator(file_path)
-    assert validator.validate() is True
-    assert not validator.errors
-    warnings = "\n".join(validator.warnings)
-    recommended_formats_str = str(RECOMMENDED_FORMATS)
-    assert f"Warning at 'data.raw_data.format': Format 'csv_file' is not in the recommended list: {recommended_formats_str}. Ensure this format is intended." in warnings
-    assert f"Warning at 'data.processed_data.format': Format 'my_custom_timeseries' is not in the recommended list: {recommended_formats_str}. Ensure this format is intended." in warnings
