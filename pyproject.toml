@@ -7,12 +7,16 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12" # env/python.json のバージョンに合わせる
-voluptuous = "^0.15.2" # requirements.txt から
-pyyaml = "^6.0.2" # requirements.txt から
+python = "^3.12"
+voluptuous = "^0.15.2"
+pyyaml = "^6.0.2"
+click = "^8.1.7"
 
 [tool.poetry.dev-dependencies]
-pytest = "^8.3.5" # requirements.txt から
+pytest = "^8.3.5"
+
+[tool.poetry.scripts]
+rtar-ddeps = "rtar_ddeps.cli:cli"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
