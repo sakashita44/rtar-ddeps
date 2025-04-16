@@ -34,4 +34,4 @@ WIP
 ## data_dependencies.yml の書式
 
 `data_dependencies.yml` の詳細な書式については、`rtar-core` プロジェクトのドキュメントを参照.
-[rtar-core](https://github.com/sakashita44/rtar)
+[rtar-core/docs/rules/DataDependencies.md](https://github.com/sakashita44/rtar/blob/main/docs/rules/DataDependencies.md)
