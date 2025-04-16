@@ -1,0 +1,63 @@
+placeholder:
+  "{A}": "Aの説明"
+  "{B}": "Bの説明"
+
+data:
+  uid:
+    path: "path/to/uid.csv"
+    layout: long
+    columns:
+      - name: uid
+        type: INTEGER
+      - name: trial_name
+        type: STRING
+  raw_sensor_data:
+    path: "path/to/raw_sensor_data/a{A}b{B}.csv"
+    layout: "long"
+    columns:
+      - name: timestamp
+        type: DATETIME
+      - name: value_raw
+        type: DOUBLE
+      - name: status_flag
+        type: INTEGER
+  processed_data:
+    path: "path/to/processed_data/a{A}b{B}.csv"
+    layout: "long"
+    columns:
+      - name: timestamp
+        type: DATETIME
+      - name: value_processed
+        type: DOUBLE
+  filtered_data:
+    path: "path/to/filtered_data/a{A}b{B}.csv"
+    layout: "long"
+    columns:
+      - name: timestamp
+        type: DATETIME
+      - name: value_filtered
+        type: DOUBLE
+  statistics_summary:
+    path: "path/to/statistics_summary.csv"
+    layout: wide
+    columns:
+      - name: mean
+        type: DOUBLE
+      - name: stddev
+        type: DOUBLE
+  trial_data:
+    path: "path/to/trial_data.csv"
+    layout: wide
+    columns:
+      - name: timestamp
+        type: DATETIME
+      - name: uid* # *がつく場合, 特定のデータの値が入る(可変長になる)
+        type: INTEGER
+
+parameter:
+  conversion_factor:
+    path: "path/to/params.yml"
+    type: DOUBLE
+  filter_threshold:
+    path: "path/to/params.yml"
+    type: DOUBLE
