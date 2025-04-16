@@ -1,0 +1,45 @@
+metadata:
+  title: "参照エラーテスト"
+  purposes:
+    - "参照整合性エラーの検出"
+target:
+  - processed_data
+  - final_result # Error: data に定義されていない
+
+data:
+  raw_sensor_data:
+    descriptions:
+      - "生データ"
+    format: table
+    unit: "-"
+    columns:
+      - name: timestamp
+        description: "時刻"
+      - name: value
+        description: "値"
+
+  processed_data:
+    descriptions:
+      - "処理済みデータ"
+    format: time_series
+    unit: "V"
+    required_data:
+      - raw_sensor_data
+      - non_existent_data # Error: data に定義されていない
+    required_parameter:
+      - non_existent_param # Error: parameter に定義されていない
+
+  filtered_data:
+    descriptions:
+      - "フィルタ済みデータ"
+    format: time_series
+    unit: "V"
+    required_data:
+      - processed_data
+    required_parameter: # Error: parameter セクションが存在しない
+      - filter_threshold
+# parameter: # Error: parameter セクション自体が存在しない
+#   filter_threshold:
+#     descriptions:
+#       - "フィルタ閾値"
+#     unit: "-"

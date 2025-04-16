@@ -59,5 +59,10 @@
     "mounts": [
         "source=${env:USERPROFILE}\\.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
         "source=${env:USERPROFILE}\\.ssh,target=/root/.ssh,type=bind,consistency=cached",
-    ]
+    ],
+    // 起動時に自動的にrtar-ddepsを導入して、.bashrcに追記する
+    // これにより、コンテナ起動後にrtar-ddepsを補完込みで使用できるようになる
+    // ただし、.bashrcの変更はコンテナを再起動しないと反映されない
+    // そのため、コンテナ起動後に手動で.bashrcをソースする必要があることがある
+    "postStartCommand": "pip install -e . && grep -qxF 'eval \"$(_RTAR_DDEPS_COMPLETE=bash_source rtar-ddeps)\"' /root/.bashrc || echo 'eval \"$(_RTAR_DDEPS_COMPLETE=bash_source rtar-ddeps)\"' >> /root/.bashrc && sourse /root/.bashrc"
 }

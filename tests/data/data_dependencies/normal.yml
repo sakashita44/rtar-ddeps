@@ -1,0 +1,81 @@
+# data_dependencies.yml (正常ケース例)
+metadata:
+  title: "センサーデータの前処理と統計量算出"
+  purposes:
+    - "生センサーデータからノイズを除去し、整形する"
+    - "整形済みデータから基本的な統計量を計算する"
+    - "処理プロセスにおけるデータ依存関係を明確にする"
+  terms:
+    - name: "用語1"
+      descriptions:
+        - "用語1の説明"
+    - name: "用語2"
+      descriptions:
+        - "用語2の説明"
+  note:
+    - "パラメータ 'filter_threshold' の値は実験的に決定される"
+
+target:
+  - statistics_summary # 最終的に生成したいデータ
+
+data:
+  raw_sensor_data:
+    descriptions:
+      - "センサーAから取得した生の時間変化データ"
+    format: table
+    unit: "-"
+    columns:
+      - name: timestamp
+        description: "データ取得時刻 (ISO 8601形式)"
+      - name: value_raw
+        description: "センサーの生出力値 (mV)"
+      - name: status_flag
+        description: "データ品質フラグ (0:正常, 1:異常)"
+
+  processed_data:
+    descriptions:
+      - "生データから異常フラグを除外し、単位を変換したデータ"
+    format: time_series
+    unit: "V" # mVからVに変換
+    required_data:
+      - raw_sensor_data
+    required_parameter:
+      - conversion_factor
+    process:
+      - "'raw_sensor_data' から 'status_flag' が 0 のレコードのみ抽出"
+      - "'value_raw' 列に 'conversion_factor' を乗じて単位を V に変換"
+      - "'timestamp' 列と変換後の値で時系列データを作成"
+
+  filtered_data:
+    descriptions:
+      - "整形済みデータにフィルタを適用したデータ"
+    format: time_series
+    unit: "V"
+    required_data:
+      - processed_data
+    required_parameter:
+      - filter_threshold
+    process:
+      - "'processed_data' に対して、'filter_threshold' を用いて平滑化フィルタを適用"
+
+  statistics_summary:
+    descriptions:
+      - "フィルタ適用済みデータの基本的な統計量"
+    format: single # 単一の値や構造化データ（ここでは平均と標準偏差）
+    unit: "-" # 複数の単位を含むためハイフン
+    required_data:
+      - filtered_data
+    process:
+      - "'filtered_data' の値の平均値と標準偏差を計算"
+      - "結果を構造化データとしてまとめる" # 例: {mean: X, stddev: Y}
+
+parameter:
+  conversion_factor:
+    descriptions:
+      - "センサー出力値 (mV) を電圧 (V) に変換するための係数"
+    unit: "V/mV" # 単位を明記
+
+  filter_threshold:
+    descriptions:
+      - "平滑化フィルタの閾値、またはカットオフ周波数など"
+    unit: "-" # フィルタの種類によって単位が変わるため、ここではハイフン

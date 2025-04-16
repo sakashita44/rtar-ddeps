@@ -1,0 +1,19 @@
+metadata:
+  title: "空定義エラーテスト"
+  purposes:
+    - "必須項目の空定義エラーの検出"
+target: [] # Error: target リストが空
+
+data:
+  table_data:
+    descriptions:
+      - "テーブルデータ"
+    format: table
+    unit: "-"
+    columns: [] # Error: format が table なのに columns リストが空
+  processed_data:
+    descriptions:
+      - "処理データ"
+    format: single
+    unit: "-"
+    process: [] # Error: process リストが空

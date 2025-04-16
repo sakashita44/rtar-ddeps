@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "rtar-ddeps"
+version = "0.1.0"
+description = "A Python package to manage and utilize data dependency definition files (data_dependencies.yml) used in the rtar framework."
+authors = ["Y Sakashita <73250095+sakashita44@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+voluptuous = "^0.15.2"
+pyyaml = "^6.0.2"
+click = "^8.1.7"
+
+[tool.poetry.dev-dependencies]
+pytest = "^8.3.5"
+
+[tool.poetry.scripts]
+rtar-ddeps = "rtar_ddeps.cli:cli"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

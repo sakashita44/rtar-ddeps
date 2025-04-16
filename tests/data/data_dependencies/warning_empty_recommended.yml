@@ -1,0 +1,35 @@
+metadata:
+  title: "推奨項目の空定義テスト (Warning)"
+  purposes: [] # Warning: purposes リストが空
+  terms: [] # Warning: terms リストが空
+  note: [] # Warning: note リストが空
+target:
+  - data_c
+
+data:
+  data_a:
+    descriptions: [] # Warning: descriptions リストが空
+    format: single
+    unit: "-"
+  data_b:
+    descriptions:
+      - "データB"
+    format: single
+    unit: "-"
+    required_data: [] # Warning: required_data リストが空
+    required_parameter: [] # Warning: required_parameter リストが空
+  data_c:
+    descriptions:
+      - "データC"
+    format: single
+    unit: "-"
+    required_data:
+      - data_a
+      - data_b
+    required_parameter:
+      - param1
+
+parameter:
+  param1:
+    descriptions: [] # Warning: descriptions リストが空
+    unit: "-"
