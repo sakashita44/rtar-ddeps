@@ -58,12 +58,12 @@ class BaseValidator(abc.ABC):
 
     def _add_error(self, message: str, path: List[str] | None = None):
         """エラーメッセージをリストに追加する."""
-        prefix = f"Error at '{".".join(path)}': " if path else "Error: "
+        prefix = f"Error at {'.'.join(path)}: " if path else "Error: "
         self.errors.append(prefix + message)
 
     def _add_warning(self, message: str, path: List[str] | None = None):
         """警告メッセージをリストに追加する."""
-        prefix = f"Warning at '{".".join(path)}': " if path else "Warning: "
+        prefix = f"Warning at {'.'.join(path)}: " if path else "Warning: "
         self.warnings.append(prefix + message)
 
     def _print_results(self):
