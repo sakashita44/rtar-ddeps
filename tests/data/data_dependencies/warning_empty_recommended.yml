@@ -1,6 +1,7 @@
 metadata:
   title: "推奨項目の空定義テスト (Warning)"
   purposes: [] # Warning: purposes リストが空
+  terms: [] # Warning: terms リストが空
   note: [] # Warning: note リストが空
 target:
   - data_c

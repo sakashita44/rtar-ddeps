@@ -17,7 +17,7 @@ ColumnSchema = Schema({
 
 # --- データ定義スキーマ ---
 DataSchema = Schema({
-    Required('descriptions'): NonEmptyListOfStrings, # 空リストは Validator 側で Warning
+    Required('descriptions'): PossiblyEmptyListOfStrings, # 空リストは Validator 側で Warning
     Required('format'): NonEmptyString, # 推奨値チェックは Validator 側で Warning
     Required('unit'): str, # `-` を許容
     Optional('columns'): [ColumnSchema], # format=table 時の必須/非空チェックは Validator 側 (Error)
@@ -28,14 +28,21 @@ DataSchema = Schema({
 
 # --- パラメータ定義スキーマ ---
 ParameterSchema = Schema({
-    Required('descriptions'): NonEmptyListOfStrings, # 空リストは Validator 側で Warning
+    Required('descriptions'): PossiblyEmptyListOfStrings, # 空リストは Validator 側で Warning
     Required('unit'): str, # `-` を許容
 }, extra=ALLOW_EXTRA)
+
+# --- 用語オブジェクトスキーマ ---
+TermObjectSchema = Schema({
+    Required('name'): NonEmptyString,
+    Required('descriptions'): PossiblyEmptyListOfStrings, # 空リストも許可
+}, extra=ALLOW_EXTRA) # name, descriptions 以外のキーも許容する場合
 
 # --- メタデータスキーマ ---
 MetadataSchema = Schema({
     Required('title'): NonEmptyString,
-    Required('purposes'): NonEmptyListOfStrings, # 空リストは Validator 側で Warning
+    Required('purposes'): PossiblyEmptyListOfStrings, # 空リストは Validator 側で Warning
+    Optional('terms'): [TermObjectSchema], # 空リストは Validator 側で Warning
     Optional('note'): PossiblyEmptyListOfStrings, # 空リストは Validator 側で Warning
 }, extra=ALLOW_EXTRA)
 
