@@ -1,0 +1,24 @@
+metadata:
+  title: "循環参照テスト"
+  purposes:
+    - "データ間の循環依存関係の検出"
+
+target:
+  - data_b # どちらをターゲットにしても循環は発生
+
+data:
+  data_a:
+    descriptions:
+      - "データA"
+    format: single
+    unit: "-"
+    required_data:
+      - data_b # Error: data_b に依存
+
+  data_b:
+    descriptions:
+      - "データB"
+    format: single
+    unit: "-"
+    required_data:
+      - data_a # Error: data_a に依存し、循環参照が発生

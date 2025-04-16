@@ -1,0 +1,30 @@
+metadata:
+  title: "データ型不一致テスト"
+  purposes:
+    - "データ型のバリデーションエラー検出"
+target: "processed_data" # Error: リストではなく文字列
+
+data:
+  raw_data:
+    descriptions: "生データの説明" # Error: リストではなく文字列
+    format: table
+    unit: "-"
+    columns:
+      - name: time
+        description: "時間"
+      - name: value
+        description: "値"
+
+  processed_data:
+    descriptions:
+      - "処理済みデータ"
+    format: time_series
+    unit: "V"
+    required_data: "raw_data" # Error: リストではなく文字列
+    required_parameter:
+      - factor # これはOK
+
+parameter:
+  factor:
+    descriptions: "変換係数" # Error: リストではなく文字列
+    unit: "-"
