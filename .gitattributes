@@ -1,0 +1,9 @@
+# データファイルをDVCで管理するための設定
+data/**/*.csv filter=dvc
+data/**/*.json filter=dvc
+data/**/*.c3d filter=dvc
+
+# nbstripoutを使用してJupyter Notebookの出力を除去する設定
+*.ipynb filter=nbstripout
+*.zpln filter=nbstripout
+*.ipynb diff=ipynb

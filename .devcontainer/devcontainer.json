@@ -1,0 +1,63 @@
+{
+    "name": "ddeps",
+    "dockerFile": "../env/Dockerfile",
+    "context": "../env",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                // Python and Jupyter related
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-toolsai.jupyter",
+                // Version control and CI/CD
+                "iterative.dvc",
+                "github.vscode-github-actions",
+                // Docker and YAML
+                "ms-azuretools.vscode-docker",
+                "redhat.vscode-yaml",
+                // Markdown and documentation
+                "bierner.markdown-mermaid",
+                "yzane.markdown-pdf",
+                "DavidAnson.vscode-markdownlint",
+                "yzhang.markdown-all-in-one",
+                // Code quality and utilities
+                "streetsidesoftware.code-spell-checker",
+                "Gruntfuggly.todo-tree",
+                "oderwat.indent-rainbow",
+                // CSV editing
+                "janisdd.vscode-edit-csv"
+            ],
+            "settings": {
+                "python.linting.enabled": true,
+                "python.linting.flake8Enabled": true,
+                "python.linting.pylintEnabled": false,
+                "python.formatting.provider": "black",
+                "python.analysis.extraPaths": [
+                    "/workspace/scripts/common",
+                    "/workspace/scripts/interface"
+                ],
+                "editor.formatOnSave": true,
+                "editor.rulers": [
+                    88
+                ],
+                "jupyter.notebookFileRoot": "/workspace",
+                "python.linting.flake8Args": [
+                    "--max-line-length=88",
+                    "--extend-ignore=E203"
+                ]
+            }
+        }
+    },
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "workspaceFolder": "/workspace",
+    "remoteUser": "root",
+    "postCreateCommand": "bash ./scripts/misc/setup/container_setup.sh",
+    "runArgs": [
+        "--env-file",
+        ".devcontainer/.env"
+    ],
+    "mounts": [
+        "source=${env:USERPROFILE}\\.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
+        "source=${env:USERPROFILE}\\.ssh,target=/root/.ssh,type=bind,consistency=cached",
+    ]
+}
