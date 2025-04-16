@@ -1,7 +1,8 @@
 import abc
 from pathlib import Path
 import yaml
-from typing import List # 追加
+from typing import List
+from .custom_yaml_loader import CustomDuplicateKeyLoader, DuplicateKeyError
 
 class BaseValidator(abc.ABC):
     """
@@ -84,8 +85,41 @@ class BaseValidator(abc.ABC):
                 # エラーがなく警告のみの場合
                 print("\nValidation successful (with warnings).")
 
+    def check_duplicate_keys(self) -> bool:
+        """
+        カスタムローダーを使用してキーの重複のみをチェックする.
+        self.data は変更せず、エラーがあれば self.errors に追加する.
+
+        Returns:
+            True: 重複なし, False: 重複ありまたは読み込みエラー.
+        """
+        try:
+            with open(self.file_path, 'r', encoding='utf-8') as f:
+                # このメソッド内でのみカスタムローダーを使用
+                yaml.load(f, Loader=CustomDuplicateKeyLoader)
+            return True # 重複なければ True
+        except FileNotFoundError:
+            # load_yaml で既にチェックされているはずだが念のため
+            self._add_error(f"File not found during duplicate check: {self.file_path}")
+            return False
+        except DuplicateKeyError as e:
+            # 重複エラーを self.errors に追加
+            self._add_error(f"YAML parsing error: {e}")
+            return False
+        except yaml.YAMLError as e:
+            # その他の構文エラーもエラーとして記録
+            mark_info = ""
+            mark = getattr(e, 'problem_mark', None)
+            if mark:
+                mark_info = f" at line {mark.line + 1}, column {mark.column + 1}"
+            self._add_error(f"YAML parsing error during duplicate check{mark_info}: {e}")
+            return False
+        except Exception as e:
+            self._add_error(f"Unexpected error during duplicate check: {e}")
+            return False
+
     @abc.abstractmethod
-    def validate(self) -> bool:
+    def _perform_validation(self) -> bool:
         """
         具体的なバリデーションロジックを実行する抽象メソッド.
 
@@ -99,3 +133,36 @@ class BaseValidator(abc.ABC):
             エラーがあった場合はFalse.
         """
         pass # 実装はサブクラスで行う
+
+    def validate(self) -> bool:
+        """
+        バリデーションプロセス全体を実行する (テンプレートメソッド).
+
+        1. YAMLファイルを読み込む.
+        2. キーの重複をチェックする.
+        3. サブクラス固有のバリデーションを実行する.
+        4. 結果を表示する.
+
+        Returns:
+            バリデーション全体でエラーがなければ True, あれば False.
+        """
+        # 1. YAML 読み込み
+        self.data = self.load_yaml()
+        if self.data is None:
+            # 読み込み失敗 (エラーは load_yaml 内で記録済み)
+            self._print_results()
+            return False
+
+        # 2. キー重複チェック
+        # check_duplicate_keys はエラーがあれば self.errors に追加する
+        self.check_duplicate_keys()
+        # 重複キーエラーがあっても、スキーマチェック等は試みる場合があるため、
+        # ここでは即座に return False しない (最終的に self.errors で判断)
+
+        # 3. サブクラス固有のバリデーション実行
+        # _perform_validation はエラーがあれば False を返し、self.errors にも追加する
+        self._perform_validation()
+
+        # 4. 結果表示と最終結果判定
+        self._print_results()
+        return not self.errors # エラーリストが空なら True

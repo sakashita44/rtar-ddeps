@@ -1,6 +1,5 @@
 # data_dependencies.ymlのバリデーションを行う
 
-import yaml
 from pathlib import Path
 from typing import Any, Dict, List, Set, Tuple # List は型ヒント用に残す
 from voluptuous import MultipleInvalid
@@ -24,71 +23,57 @@ class DataDependenciesValidator(BaseValidator):
             file_path: バリデーション対象の data_dependencies.yml ファイルパス.
         """
         super().__init__(file_path)
-        # self.errors: List[str] = [] # BaseValidator に移動
-        # self.warnings: List[str] = [] # BaseValidator に移動
         self._data_keys: Set[str] = set()
         self._param_keys: Set[str] = set()
 
-    def validate(self) -> bool:
+    def _perform_validation(self) -> bool:
         """
-        data_dependencies.yml のバリデーションを実行する.
+        data_dependencies.yml 固有のバリデーションを実行する.
+        (BaseValidator の validate メソッドから呼び出される)
 
-        1. YAMLファイルを読み込む (BaseValidator).
-        2. スキーマバリデーションを実行する.
-        3. カスタムバリデーションルールを実行する (スキーマ検証成功時のみ).
-        4. 結果 (エラーと警告) を報告する (BaseValidator).
+        1. スキーマバリデーションを実行する.
+        2. カスタムバリデーションルールを実行する (スキーマ検証成功時のみ).
 
         Returns:
-            バリデーションが成功した場合は True, エラーがあった場合は False.
-            警告のみの場合は True を返す.
+            このステップでエラーが発生した場合は False, それ以外は True.
+            (最終的な成否は BaseValidator.validate が self.errors で判断)
         """
-        # エラー/警告リストの初期化は BaseValidator の load_yaml で行われる
-        self._data_keys = set()
-        self._param_keys = set()
+        # self.data は BaseValidator.validate で読み込み済みのはず
+        if self.data is None:
+             # 通常ここには来ないはずだが念のため
+            self._add_error("Internal error: Data not loaded before _perform_validation.")
+            return False
 
+        initial_error_count = len(self.errors)
+
+        # --- スキーマバリデーション ---
         try:
-            # load_yaml はエラー時に None を返すように変更 (BaseValidator 側)
-            self.data = self.load_yaml()
-            if self.data is None:
-                # load_yaml 内でエラーが self.errors に追加されているはず
-                self._print_results() # 結果を表示
-                return False
+            DataDependenciesSchema(self.data)
+        except MultipleInvalid as e:
+            for error in e.errors:
+                self._add_error(f"Schema error: {error.msg}", list(map(str, error.path)))
+            # スキーマエラーがある場合は、以降のカスタムバリデーションは行わない
+            return False # このステップでエラー発生
 
-            # --- スキーマバリデーション ---
-            try:
-                DataDependenciesSchema(self.data)
-            except MultipleInvalid as e:
-                # voluptuous のエラーメッセージを整形して追加
-                for error in e.errors:
-                    path_str = ".".join(map(str, error.path))
-                    # self.errors.append(f"Schema error at '{path_str}': {error.msg}") # BaseValidator のメソッドを使用
-                    self._add_error(f"Schema error: {error.msg}", list(map(str, error.path))) # パス情報を渡す
-                # スキーマエラーがある場合は、以降のカスタムバリデーションは行わない
-                self._print_results() # 結果を表示
-                return False
+        # スキーマ検証成功後にキーセットを初期化
+        if isinstance(self.data, dict) and isinstance(self.data.get('data'), dict):
+            self._data_keys = set(self.data['data'].keys())
+        if isinstance(self.data, dict) and isinstance(self.data.get('parameter'), dict):
+            self._param_keys = set(self.data['parameter'].keys())
 
-            # スキーマ検証成功後にキーセットを初期化
-            if isinstance(self.data, dict) and isinstance(self.data.get('data'), dict):
-                self._data_keys = set(self.data['data'].keys())
-            if isinstance(self.data, dict) and isinstance(self.data.get('parameter'), dict):
-                self._param_keys = set(self.data['parameter'].keys())
+        # --- カスタムバリデーション ---
+        # これらのメソッドはエラーがあれば self.errors に追加する
+        self._validate_emptiness()
+        self._validate_references()
+        self._validate_uniqueness()
+        self._validate_circular_dependencies()
 
-            # --- カスタムバリデーション ---
-            self._validate_emptiness()
-            self._validate_references()
-            self._validate_uniqueness()
-            self._validate_circular_dependencies()
-            self._validate_warnings()
+        # --- 警告チェック ---
+        # 警告はバリデーションの成否に影響しない
+        self._validate_warnings()
 
-        except FileNotFoundError as e:
-            # load_yaml で raise される場合 (BaseValidator の実装による)
-            self._add_error(str(e))
-        except Exception as e:
-            # 予期せぬエラーをキャッチ
-            self._add_error(f"An unexpected error occurred during validation: {e}")
-
-        self._print_results() # 最後に結果を表示
-        return not self.errors # エラーがなければ True
+        # このステップでのエラー発生有無を返す
+        return len(self.errors) == initial_error_count
 
     def _validate_emptiness(self):
         """致命的な空の定義をチェックする."""
