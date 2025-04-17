@@ -1,19 +1,11 @@
 placeholder:
-  "{A}": "Aの説明"
-  "{B}": "Bの説明"
+  "{A}": "subject_id"
+  "{B}": "trial_id"
 
 data:
-  uid:
-    path: "path/to/uid.csv"
-    layout: long
-    columns:
-      - name: uid
-        type: INTEGER
-      - name: trial_name
-        type: STRING
   raw_sensor_data:
-    path: "path/to/raw_sensor_data/a{A}b{B}.csv"
-    layout: "long"
+    path: "data/raw/sensor_data/{A}_{B}.csv"
+    layout: long
     columns:
       - name: timestamp
         type: DATETIME
@@ -22,42 +14,64 @@ data:
       - name: status_flag
         type: INTEGER
   processed_data:
-    path: "path/to/processed_data/a{A}b{B}.csv"
-    layout: "long"
+    path: "data/processed/processed_data/{A}_{B}.csv"
+    layout: long
     columns:
       - name: timestamp
         type: DATETIME
-      - name: value_processed
+      - name: value
         type: DOUBLE
   filtered_data:
-    path: "path/to/filtered_data/a{A}b{B}.csv"
-    layout: "long"
+    path: "data/processed/filtered_data/{A}_{B}.csv"
+    layout: long
     columns:
       - name: timestamp
         type: DATETIME
       - name: value_filtered
         type: DOUBLE
   statistics_summary:
-    path: "path/to/statistics_summary.csv"
+    path: "results/summary/statistics_summary.yml"
     layout: wide
-    columns:
+    keys:
       - name: mean
         type: DOUBLE
       - name: stddev
         type: DOUBLE
-  trial_data:
-    path: "path/to/trial_data.csv"
+  user_ids:
+    path: "data/config/user_ids.json"
+  user_specific_summary:
+    path: "results/summary/user_specific_summary.csv"
     layout: wide
     columns:
       - name: timestamp
         type: DATETIME
-      - name: uid* # *がつく場合, 特定のデータの値が入る(可変長になる)
-        type: INTEGER
+      - name: user_ids*
+        type: DOUBLE
+  calculated_threshold:
+    path: "results/values/calculated_threshold.txt"
+  raw_image:
+    path: "data/raw/image.png"
+  processed_image:
+    path: "data/processed/processed_image.png"
+  analysis_report:
+    path: "results/report/analysis_report.md"
 
 parameter:
   conversion_factor:
-    path: "path/to/params.yml"
+    path: "params/config.yml"
     type: DOUBLE
   filter_threshold:
-    path: "path/to/params.yml"
+    path: "params/config.yml"
     type: DOUBLE
+  roi_top:
+    path: "params/image_processing.yml"
+    type: INTEGER
+  roi_bottom:
+    path: "params/image_processing.yml"
+    type: INTEGER
+  roi_left:
+    path: "params/image_processing.yml"
+    type: INTEGER
+  roi_right:
+    path: "params/image_processing.yml"
+    type: INTEGER
