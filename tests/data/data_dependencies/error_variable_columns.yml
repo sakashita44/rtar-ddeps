@@ -47,7 +47,8 @@ data:
         description: "key_source 欠落"
 
   table_error3:
-    descriptions: ["エラー3: key_source で指定された列が参照先テーブルに存在しない"]
+    descriptions:
+      ["エラー3: key_source で指定された列が参照先テーブルに存在しない"]
     format: table
     unit: "table"
     columns:
@@ -77,87 +78,4 @@ data:
         description: "時間"
       - name: ref_list* # Error: key_source が指定されているのに参照先 'ref_list' の format が 'table' 以外
         description: "不適切な key_source"
-        key_source: some_key # format が table でないので key_source は不要metadata:
-  title: "可変長データ定義エラーテスト"
-  purposes:
-    - "可変長列定義に関するエラーの検出"
-target:
-  - table_error1
-  - table_error2
-  - table_error3
-  - table_error4
-  - table_error5
-data:
-  # --- 参照用データ ---
-  ref_table:
-    descriptions: ["参照用テーブル"]
-    format: table
-    unit: "table"
-    columns:
-      - name: id_col
-        description: "ID列"
-      - name: value_col
-        description: "値列"
-  ref_list:
-    descriptions: ["参照用リスト"]
-    format: list
-    unit: "-"
-  ref_single:
-    descriptions: ["参照用単一値"]
-    format: single
-    unit: "-"
-
-  # --- エラーケース ---
-  table_error1:
-    descriptions: ["エラー1: name* の参照先未定義"]
-    format: table
-    unit: "table"
-    columns:
-      - name: time
-        description: "時間"
-      - name: non_existent_ref* # Error: 'non_existent_ref' は data に未定義
-        description: "未定義参照"
-
-  table_error2:
-    descriptions: ["エラー2: name* (参照先 table) で key_source 欠落"]
-    format: table
-    unit: "table"
-    columns:
-      - name: time
-        description: "時間"
-      - name: ref_table* # Error: 参照先 format が table なのに key_source がない
-        description: "key_source 欠落"
-
-  table_error3:
-    descriptions:
-      ["エラー3: name* (参照先 table) で key_source の参照先列未定義"]
-    format: table
-    unit: "table"
-    columns:
-      - name: time
-        description: "時間"
-      - name: ref_table*
-        description: "不正な key_source"
-        key_source: non_existent_col # Error: 'ref_table' に 'non_existent_col' はない
-
-  table_error4:
-    descriptions: ["エラー4: key_source があるのに name に * がない"]
-    format: table
-    unit: "table"
-    columns:
-      - name: time
-        description: "時間"
-      - name: ref_table # Error: name に * がないのに key_source がある
-        description: "アスタリスク欠落"
-        key_source: id_col
-
-  table_error5:
-    descriptions: ["エラー5: key_source があるのに参照先 format が table 以外"]
-    format: table
-    unit: "table"
-    columns:
-      - name: time
-        description: "時間"
-      - name: ref_list* # Error: 参照先 format が list なのに key_source がある
-        description: "不正な key_source (参照先 list)"
-        key_source: some_key # format が table 以外では key_source は不要
+        key_source: some_key # format が table でないので key_source は不要
