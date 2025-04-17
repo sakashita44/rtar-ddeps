@@ -1,0 +1,12 @@
+metadata:
+  title: "Dictionary Error: Missing 'keys'"
+  purposes:
+    - "format が dictionary なのに keys がないエラーを検出"
+target:
+  - dict_data
+data:
+  dict_data: # Error: format が dictionary なのに keys がない
+    descriptions: ["キー定義がない辞書"]
+    format: dictionary
+    unit: "dictionary"
+    # keys: フィールドが欠落

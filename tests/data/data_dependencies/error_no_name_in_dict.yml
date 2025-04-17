@@ -1,0 +1,15 @@
+metadata:
+  title: "Dictionary Error: 'keys' item missing 'name'"
+  purposes:
+    - "keys 要素の name が欠落しているエラーを検出"
+target:
+  - dict_data
+data:
+  dict_data: # Error: keys 要素の name が欠落
+    descriptions: ["keys 要素の name がない辞書"]
+    format: dictionary
+    unit: "dictionary"
+    keys:
+      - description: "キー1の説明" # name がない
+      - name: key2
+        description: "キー2"
