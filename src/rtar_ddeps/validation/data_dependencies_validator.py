@@ -55,8 +55,11 @@ class DataDependenciesValidator(BaseValidator):
         except MultipleInvalid as e:
             # スキーマ違反の詳細をエラーリストに追加
             for error in e.errors:
-                self._add_error(f"Schema error: {error.msg}", path=list(map(str, error.path)))
-            return False  # スキーマエラー時点で終了
+                # voluptuous のパスを文字列リストに変換して _add_error に渡す
+                error_path = list(map(str, error.path))
+                self._add_error(f"Schema error: {error.msg}", path=error_path)
+            # スキーマエラーがあれば以降のカスタム検証は行わない方針に変更
+            return False # スキーマエラー時点で終了
 
         # スキーマ検証成功後にキーセットを初期化 (重複チェック用)
         if isinstance(self.data, dict) and isinstance(self.data.get('data'), dict):
@@ -201,7 +204,8 @@ class DataDependenciesValidator(BaseValidator):
                 if not isinstance(column_def, dict):
                     continue # カラム定義が辞書でない場合はスキップ (スキーマエラー)
 
-                col_path = ['data', data_name, 'columns', col_index]
+                # パス要素はすべて文字列にする (col_index を str に変換)
+                col_path = ['data', data_name, 'columns', str(col_index)]
                 col_name = column_def.get('name')
                 key_source = column_def.get('key_source')
 
@@ -290,8 +294,11 @@ class DataDependenciesValidator(BaseValidator):
                             if isinstance(ref_data_def, dict):
                                 ref_format = ref_data_def.get('format')
                                 if ref_format in {'single', 'binary', 'document'}:
-                                    col_path = path_base + ['columns', col_index]
-                                    self._add_warning(f"Variable column '{col_name}' references data '{ref_data_name}' with format '{ref_format}', which might be inappropriate for key-based referencing.", col_path + ['name'])
+                                    # col_index を str() で文字列に変換する
+                                    col_path = path_base + ['columns', str(col_index)]
+                                    message = f"Variable column '{col_name}' references data '{ref_data_name}' with format '{ref_format}', which might be inappropriate for key-based referencing."
+                                    warning_path = col_path + ['name']
+                                    self._add_warning(message, warning_path)
 
 
         # parameter の空リストチェック
