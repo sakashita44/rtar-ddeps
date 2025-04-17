@@ -25,10 +25,9 @@ def normal_file():
     "error_missing_required_more.yml",
     "error_type_mismatch_more.yml",
     "error_terms.yml",
-    "error_dict_missing_keys.yml", # 削除: ファイルが存在しない
-    # "error_dict_has_columns.yml",
-    # # "error_dict_empty_keys.yml", # 削除: ファイルが存在しない
-    # --- ここまで ---
+    "error_dict_missing_keys.yml",
+    "error_dict_has_columns.yml",
+    "error_dict_empty_keys.yml",
 ])
 def error_file(request):
     return TEST_DATA_DIR / request.param
