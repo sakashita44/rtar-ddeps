@@ -9,7 +9,7 @@ data:
     descriptions:
       - "テーブルデータ"
     format: table
-    unit: "-"
+    unit: "table"
     columns: [] # Error: 'format' が 'table' なのに 'columns' リストが空
   processed_data:
     descriptions:
@@ -17,3 +17,9 @@ data:
     format: single
     unit: "-"
     process: [] # Error: 'process' リストが空 (処理内容が未定義)
+  dict_data:
+    descriptions:
+      - "辞書データ"
+    format: dictionary
+    unit: "dictionary"
+    keys: [] # Error: 'format' が 'dictionary' なのに 'keys' リストが空

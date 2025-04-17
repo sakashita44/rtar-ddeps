@@ -1,0 +1,17 @@
+metadata:
+  title: "Dictionary Error: Has 'columns'"
+  purposes:
+    - "format が dictionary なのに columns があるエラーを検出"
+target:
+  - dict_data
+data:
+  dict_data: # Error: format が dictionary なのに columns がある
+    descriptions: ["columns を持つ辞書"]
+    format: dictionary
+    unit: "dictionary"
+    keys:
+      - name: key1
+        description: "キー1"
+    columns: # このフィールドは dictionary では不正
+      - name: col1
+        description: "列1"
