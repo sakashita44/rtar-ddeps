@@ -69,7 +69,7 @@ class DataDependenciesValidator(BaseValidator):
 
         # --- カスタムバリデーション ---
         # これらのメソッドはエラーがあれば self.errors に追加する
-        self._validate_format_and_columns()
+        self._validate_format_specific_fields()
         self._validate_emptiness()
         self._validate_references()
         self._validate_uniqueness()
@@ -83,11 +83,12 @@ class DataDependenciesValidator(BaseValidator):
         # 最終的なエラー数をチェックして成否を返す
         return len(self.errors) == initial_error_count
 
-    def _validate_format_and_columns(self):
+    def _validate_format_specific_fields(self):
         """
-        data セクション内の format と columns の関連性をチェックする.
-        - format が 'table' の場合, columns が必須.
+        data セクション内の format と、それに応じたフィールド (columns/keys) の関連性をチェックする.
         - format が許可された値かチェック.
+        - format が 'table' の場合, columns が必須で keys は不可.
+        - format が 'dictionary' の場合, keys が必須で columns は不可.
         """
         if not isinstance(self.data, dict) or 'data' not in self.data or not isinstance(self.data['data'], dict):
             return # data セクションがないか, 辞書でない場合はチェック不能
@@ -99,14 +100,25 @@ class DataDependenciesValidator(BaseValidator):
             data_path = ['data', data_name]
             fmt = data_def.get('format')
             columns_exist = 'columns' in data_def
+            keys_exist = 'keys' in data_def
 
             # format が許可された値かチェック
             if fmt not in self.ALLOWED_FORMATS:
                 self._add_error(f"Invalid 'format' value '{fmt}'. Allowed values are: {', '.join(sorted(self.ALLOWED_FORMATS))}", path=data_path + ['format'])
+                continue # 不正な format の場合、以降のチェックはスキップ
 
-            # format が 'table' の場合に columns が存在するかチェック
-            if fmt == 'table' and not columns_exist:
-                self._add_error("'columns' key is required when 'format' is 'table'", path=data_path)
+            # format に応じたフィールドのチェック
+            if fmt == 'table':
+                if not columns_exist:
+                    self._add_error("'columns' key is required when 'format' is 'table'", path=data_path)
+                if keys_exist:
+                    self._add_error("'keys' key cannot be specified when 'format' is 'table'", path=data_path)
+            elif fmt == 'dictionary':
+                if not keys_exist:
+                    self._add_error("'keys' key is required when 'format' is 'dictionary'", path=data_path)
+                if columns_exist:
+                    self._add_error("'columns' key cannot be specified when 'format' is 'dictionary'", path=data_path)
+            # 他の format ('list', 'single', 'binary', 'document') では columns/keys の存在有無は問わない
 
     def _validate_emptiness(self):
         """致命的な空の定義をチェックする."""
@@ -114,10 +126,16 @@ class DataDependenciesValidator(BaseValidator):
         # target, data, process の空リスト/辞書チェックはスキーマ検証に任せる.
         data_section = self.data['data'] if isinstance(self.data, dict) else {}
         for data_name, data_def in data_section.items():
+            if not isinstance(data_def, dict): continue # スキーマエラーのはず
             path = ['data', data_name]
-            # format: table で columns が空リスト (これはスキーマではチェックできないカスタムルール)
-            if data_def.get('format') == 'table' and isinstance(data_def.get('columns'), list) and not data_def['columns']:
+            fmt = data_def.get('format')
+
+            # format: table で columns が空リスト
+            if fmt == 'table' and isinstance(data_def.get('columns'), list) and not data_def['columns']:
                 self._add_error("`columns` list cannot be empty when format is 'table'.", path + ['columns'])
+            # format: dictionary で keys が空リスト
+            elif fmt == 'dictionary' and isinstance(data_def.get('keys'), list) and not data_def['keys']:
+                self._add_error("`keys` list cannot be empty when format is 'dictionary'.", path + ['keys'])
 
 
     def _validate_references(self):
