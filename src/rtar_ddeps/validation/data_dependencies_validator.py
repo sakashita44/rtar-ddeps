@@ -15,6 +15,9 @@ class DataDependenciesValidator(BaseValidator):
     エラーと警告の管理は基底クラスで行う.
     """
 
+    # 許可する format の値
+    ALLOWED_FORMATS = {"table", "dictionary", "list", "single", "binary", "document"}
+
     def __init__(self, file_path: Path):
         """
         バリデーターを初期化する.
@@ -40,22 +43,22 @@ class DataDependenciesValidator(BaseValidator):
         """
         # self.data は BaseValidator.validate で読み込み済みのはず
         if self.data is None:
-             # 通常ここには来ないはずだが念のため
-            self._add_error("Internal error: Data not loaded before _perform_validation.")
-            return False
+            # YAML 読み込み失敗時は BaseValidator でエラーが記録されているはず
+            return False # バリデーション処理を続行しない
 
         initial_error_count = len(self.errors)
 
         # --- スキーマバリデーション ---
         try:
+            # トップレベルスキーマで検証
             DataDependenciesSchema(self.data)
         except MultipleInvalid as e:
+            # スキーマ違反の詳細をエラーリストに追加
             for error in e.errors:
-                self._add_error(f"Schema error: {error.msg}", list(map(str, error.path)))
-            # スキーマエラーがある場合は、以降のカスタムバリデーションは行わない
-            return False # このステップでエラー発生
+                self._add_error(f"Schema error: {error.msg}", path=list(map(str, error.path)))
+            return False  # スキーマエラー時点で終了
 
-        # スキーマ検証成功後にキーセットを初期化
+        # スキーマ検証成功後にキーセットを初期化 (重複チェック用)
         if isinstance(self.data, dict) and isinstance(self.data.get('data'), dict):
             self._data_keys = set(self.data['data'].keys())
         if isinstance(self.data, dict) and isinstance(self.data.get('parameter'), dict):
@@ -63,17 +66,44 @@ class DataDependenciesValidator(BaseValidator):
 
         # --- カスタムバリデーション ---
         # これらのメソッドはエラーがあれば self.errors に追加する
+        self._validate_format_and_columns()
         self._validate_emptiness()
         self._validate_references()
         self._validate_uniqueness()
         self._validate_circular_dependencies()
+        # self._validate_variable_columns() # 可変長列チェック (後で追加)
 
         # --- 警告チェック ---
         # 警告はバリデーションの成否に影響しない
         self._validate_warnings()
 
-        # このステップでのエラー発生有無を返す
+        # 最終的なエラー数をチェックして成否を返す
         return len(self.errors) == initial_error_count
+
+    def _validate_format_and_columns(self):
+        """
+        data セクション内の format と columns の関連性をチェックする.
+        - format が 'table' の場合, columns が必須.
+        - format が許可された値かチェック.
+        """
+        if not isinstance(self.data, dict) or 'data' not in self.data or not isinstance(self.data['data'], dict):
+            return # data セクションがないか, 辞書でない場合はチェック不能
+
+        for data_name, data_def in self.data['data'].items():
+            if not isinstance(data_def, dict):
+                continue # データ定義が辞書でない場合はスキップ (スキーマエラーで検出されるはず)
+
+            data_path = ['data', data_name]
+            fmt = data_def.get('format')
+            columns_exist = 'columns' in data_def
+
+            # format が許可された値かチェック
+            if fmt not in self.ALLOWED_FORMATS:
+                self._add_error(f"Invalid 'format' value '{fmt}'. Allowed values are: {', '.join(sorted(self.ALLOWED_FORMATS))}", path=data_path + ['format'])
+
+            # format が 'table' の場合に columns が存在するかチェック
+            if fmt == 'table' and not columns_exist:
+                self._add_error("'columns' key is required when 'format' is 'table'", path=data_path)
 
     def _validate_emptiness(self):
         """致命的な空の定義をチェックする."""
