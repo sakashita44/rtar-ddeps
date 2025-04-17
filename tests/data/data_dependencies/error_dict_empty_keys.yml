@@ -1,0 +1,12 @@
+metadata:
+  title: "Dictionary Error: 'keys' list is empty"
+  purposes:
+    - "keys リストが空のエラーを検出"
+target:
+  - dict_data
+data:
+  dict_data: # Error: keys リストが空
+    descriptions: ["keys が空リストの辞書"]
+    format: dictionary
+    unit: "dictionary"
+    keys: []

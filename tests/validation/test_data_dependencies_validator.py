@@ -25,6 +25,10 @@ def normal_file():
     "error_missing_required_more.yml",
     "error_type_mismatch_more.yml",
     "error_terms.yml",
+    "error_dict_missing_keys.yml", # 削除: ファイルが存在しない
+    # "error_dict_has_columns.yml",
+    # # "error_dict_empty_keys.yml", # 削除: ファイルが存在しない
+    # --- ここまで ---
 ])
 def error_file(request):
     return TEST_DATA_DIR / request.param
@@ -223,6 +227,35 @@ def test_error_variable_columns_details():
     assert "Error at data.table_error3.columns.1.key_source: The column 'non_existent_column' specified by 'key_source' for variable column 'ref_table*' does not exist in the referenced data 'ref_table'." in errors
     assert "Error at data.table_error4.columns.1.name: 'key_source' is specified, but the column name 'ref_table' does not end with '*'." in errors
     assert "Error at data.table_error5.columns.1.key_source: 'key_source' cannot be specified for variable column 'ref_list*' because referenced data 'ref_list' has format 'list' (must be 'table')." in errors
+
+# --- 追加: dictionary 形式のカスタムルールエラーテスト ---
+
+def test_error_dict_missing_keys_details(): # 削除: ファイルが存在しない
+    """format: dictionary で keys がないエラーの詳細チェック"""
+    file_path = TEST_DATA_DIR / "error_dict_missing_keys.yml"
+    validator = DataDependenciesValidator(file_path)
+    assert validator.validate() is False
+    errors = "\n".join(validator.errors)
+    assert "Schema error" not in errors # スキーマは通るはず
+    assert "Error at data.dict_data: 'keys' key is required when 'format' is 'dictionary'" in errors
+
+def test_error_dict_has_columns_details():
+    """format: dictionary で columns があるエラーの詳細チェック"""
+    file_path = TEST_DATA_DIR / "error_dict_has_columns.yml"
+    validator = DataDependenciesValidator(file_path)
+    assert validator.validate() is False
+    errors = "\n".join(validator.errors)
+    assert "Schema error" not in errors # スキーマは通るはず
+    assert "Error at data.dict_data: 'columns' key cannot be specified when 'format' is 'dictionary'" in errors
+
+def test_error_dict_empty_keys_details(): # 削除: ファイルが存在しない
+    """format: dictionary で keys が空リストのエラーの詳細チェック"""
+    file_path = TEST_DATA_DIR / "error_dict_empty_keys.yml"
+    validator = DataDependenciesValidator(file_path)
+    assert validator.validate() is False
+    errors = "\n".join(validator.errors)
+    assert "Schema error" not in errors # スキーマは通るはず
+    assert "Error at data.dict_data.keys: `keys` list cannot be empty when format is 'dictionary'." in errors
 
 # --- 警告テスト ---
 
