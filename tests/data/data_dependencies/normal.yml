@@ -77,12 +77,20 @@ data:
     descriptions:
       - "フィルタ適用済みデータの基本的な統計量"
     format: dictionary
-    unit: "mean:V, stddev: V" # 平均値と標準偏差の単位
+    unit: "dictionary" # 変更: dictionary を指定
     required_data:
       - filtered_data
     process:
       - "'filtered_data' の値の平均値と標準偏差を計算"
       - "結果を辞書データとしてまとめる (例: {'mean': X, 'stddev': Y})"
+    # 追加: keys フィールド
+    keys:
+      - name: mean
+        description: "平均値"
+        unit: "V" # 単位をキーごとに指定
+      - name: stddev
+        description: "標準偏差"
+        unit: "V" # 単位をキーごとに指定
 
   # --- 可変長データの例を追加 ---
   user_ids:
