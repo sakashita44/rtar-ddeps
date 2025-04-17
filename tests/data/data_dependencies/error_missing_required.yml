@@ -1,4 +1,4 @@
-# metadata: # Error: トップレベルの metadata が欠落
+# metadata: # Error: トップレベルの 'metadata' が欠落
 #   title: "タイトル"
 #   purposes:
 #     - "目的1"
@@ -11,7 +11,7 @@ data:
       - "センサーAの生データ"
     format: table
     unit: "-"
-    # columns: # Error: format が table なのに columns が欠落
+    # columns: # Error: 'format' が 'table' なのに 'columns' が欠落
     #   - name: timestamp
     #     description: "時刻"
     #   - name: value
@@ -20,7 +20,7 @@ data:
   processed_data:
     descriptions:
       - "処理済みデータ"
-    # format: time_series # Error: format が欠落
+    # format: time_series # Error: 'format' が欠落
     unit: "V"
     required_data:
       - raw_sensor_data
@@ -31,4 +31,4 @@ parameter:
   conversion_factor:
     descriptions:
       - "変換係数"
-    # unit: "V/mV" # Error: unit が欠落
+    # unit: "V/mV" # Error: 'unit' が欠落

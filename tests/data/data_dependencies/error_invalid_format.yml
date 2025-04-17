@@ -1,0 +1,11 @@
+metadata:
+  title: "不正な format 文字列テスト"
+  purposes:
+    - "data.*.format の値が不正な場合のエラー検出"
+target:
+  - data1
+data:
+  data1:
+    descriptions: ["データ1"]
+    format: "timeseries" # Error: 許可されていない format 文字列
+    unit: "-"

@@ -1,0 +1,35 @@
+metadata:
+  title: "データ型不一致テスト (追加)"
+  purposes: "目的は文字列" # Error: リストではなく文字列
+  terms: "用語定義は文字列" # Error: リストではなく文字列
+  note: "ノートは文字列" # Error: リストではなく文字列
+target:
+  - data1
+data:
+  data1:
+    descriptions: ["データ1"]
+    format: table
+    unit: "table"
+    columns: "カラム定義は文字列" # Error: リストではなく文字列
+    required_parameter: "必須パラメータは文字列" # Error: リストではなく文字列
+    process: "処理は文字列" # Error: リストではなく文字列
+  data2:
+    descriptions: ["データ2"]
+    format: table
+    unit: "table"
+    columns:
+      - "カラム1は文字列" # Error: 辞書ではなく文字列
+      - name: col2
+        description: "列2"
+  data3:
+    descriptions: ["データ3"]
+    format: single
+    unit: "-"
+    required_data:
+      - data1
+  term_data: # terms の型エラーテスト用
+    descriptions: ["用語データ"]
+    format: single
+    unit: "-"
+
+parameter: ["param1", "param2"] # Error: 辞書ではなくリスト

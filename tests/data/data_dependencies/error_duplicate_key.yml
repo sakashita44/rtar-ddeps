@@ -6,23 +6,23 @@ target:
   - data_a
 
 data:
-  data_a: # Error: 同じデータ名が複数定義されている
+  data_a: # Error: 同じデータ名 'data_a' が複数定義されている
     descriptions:
       - "データA (1回目)"
     format: single
     unit: "-"
-  data_a: # Error: 同じデータ名が複数定義されている
+  data_a: # Error: 同じデータ名 'data_a' が複数定義されている
     descriptions:
       - "データA (2回目)"
     format: single
     unit: "-"
 
 parameter:
-  param1: # Error: 同じパラメータ名が複数定義されている
+  param1: # Error: 同じパラメータ名 'param1' が複数定義されている
     descriptions:
       - "パラメータ1 (1回目)"
     unit: "-"
-  param1: # Error: 同じパラメータ名が複数定義されている
+  param1: # Error: 同じパラメータ名 'param1' が複数定義されている
     descriptions:
       - "パラメータ1 (2回目)"
     unit: "-"

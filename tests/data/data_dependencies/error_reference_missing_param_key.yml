@@ -1,0 +1,26 @@
+# filepath: /workspace/tests/data/data_dependencies/error_reference_missing_param_key.yml
+metadata:
+  title: "参照エラーテスト (パラメータキー欠落)"
+  purposes:
+    - "parameter セクションは存在するが, 要求されたキーが存在しない場合のエラー検出"
+target:
+  - processed_data
+
+data:
+  raw_data:
+    descriptions: ["生データ"]
+    format: single
+    unit: "-"
+  processed_data:
+    descriptions: ["処理済みデータ"]
+    format: single
+    unit: "-"
+    required_data:
+      - raw_data
+    required_parameter:
+      - non_existent_param # Error: 'parameter' セクションに 'non_existent_param' が定義されていない
+
+parameter:
+  existing_param: # parameter セクション自体は存在する
+    descriptions: ["存在するパラメータ"]
+    unit: "-"

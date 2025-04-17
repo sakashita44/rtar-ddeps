@@ -1,0 +1,81 @@
+metadata:
+  title: "可変長データ定義エラーテスト (Error)"
+  purposes:
+    - "可変長列の定義に関するエラー検出"
+target:
+  - table_error1
+  - table_error2
+  - table_error3
+  - table_error4
+  - table_error5
+
+data:
+  # --- 参照用データ ---
+  ref_table:
+    descriptions: ["参照用テーブル"]
+    format: table
+    unit: "table"
+    columns:
+      - name: id
+        description: "ID"
+      - name: value
+        description: "値"
+  ref_list:
+    descriptions: ["参照用リスト"]
+    format: list
+    unit: "-"
+
+  # --- エラーケース ---
+  table_error1:
+    descriptions: ["エラー1: 参照先データが存在しない"]
+    format: table
+    unit: "table"
+    columns:
+      - name: time
+        description: "時間"
+      - name: non_existent_data* # Error: 参照先 'non_existent_data' が data に定義されていない
+        description: "存在しないデータ参照"
+
+  table_error2:
+    descriptions: ["エラー2: 参照先 format が table なのに key_source がない"]
+    format: table
+    unit: "table"
+    columns:
+      - name: time
+        description: "時間"
+      - name: ref_table* # Error: 参照先 'ref_table' の format が 'table' なのに key_source がない
+        description: "key_source 欠落"
+
+  table_error3:
+    descriptions:
+      ["エラー3: key_source で指定された列が参照先テーブルに存在しない"]
+    format: table
+    unit: "table"
+    columns:
+      - name: time
+        description: "時間"
+      - name: ref_table*
+        description: "存在しない列参照"
+        key_source: non_existent_column # Error: 'ref_table' に 'non_existent_column' 列が存在しない
+
+  table_error4:
+    descriptions: ["エラー4: key_source があるのに name 末尾に * がない"]
+    format: table
+    unit: "table"
+    columns:
+      - name: time
+        description: "時間"
+      - name: ref_table # Error: key_source が指定されているのに name 末尾に * がない
+        description: "アスタリスク欠落"
+        key_source: id
+
+  table_error5:
+    descriptions: ["エラー5: key_source があるのに参照先 format が table 以外"]
+    format: table
+    unit: "table"
+    columns:
+      - name: time
+        description: "時間"
+      - name: ref_list* # Error: key_source が指定されているのに参照先 'ref_list' の format が 'table' 以外
+        description: "不適切な key_source"
+        key_source: some_key # format が table でないので key_source は不要

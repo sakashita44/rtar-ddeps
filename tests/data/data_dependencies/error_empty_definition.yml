@@ -2,7 +2,7 @@ metadata:
   title: "空定義エラーテスト"
   purposes:
     - "必須項目の空定義エラーの検出"
-target: [] # Error: target リストが空
+target: [] # Error: 'target' リストが空
 
 data:
   table_data:
@@ -10,10 +10,10 @@ data:
       - "テーブルデータ"
     format: table
     unit: "-"
-    columns: [] # Error: format が table なのに columns リストが空
+    columns: [] # Error: 'format' が 'table' なのに 'columns' リストが空
   processed_data:
     descriptions:
       - "処理データ"
     format: single
     unit: "-"
-    process: [] # Error: process リストが空
+    process: [] # Error: 'process' リストが空 (処理内容が未定義)

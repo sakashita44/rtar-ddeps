@@ -9,6 +9,7 @@ NonEmptyString = All(str, Length(min=1))
 ColumnSchema = Schema({
     Required('name'): NonEmptyString,
     Required('description'): NonEmptyString,
+    Optional('key_source'): str, # 可変長列定義用に key_source を追加
 }, extra=ALLOW_EXTRA)
 
 # --- データ定義スキーマ ---

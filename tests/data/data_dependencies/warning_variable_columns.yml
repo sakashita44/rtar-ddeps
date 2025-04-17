@@ -1,0 +1,53 @@
+metadata:
+  title: "不適切な可変長データ参照テスト (Warning)"
+  purposes:
+    - "可変長列の参照先 format が不適切な場合の警告検出"
+target:
+  - table_warning1
+  - table_warning2
+  - table_warning3
+data:
+  # --- 参照用データ ---
+  ref_single:
+    descriptions: ["参照用単一値"]
+    format: single
+    unit: "-"
+  ref_binary:
+    descriptions: ["参照用バイナリ"]
+    format: binary
+    unit: "-"
+  ref_document:
+    descriptions: ["参照用ドキュメント"]
+    format: document
+    unit: "-"
+
+  # --- 警告ケース ---
+  table_warning1:
+    descriptions: ["警告1: 参照先 format が single"]
+    format: table
+    unit: "table"
+    columns:
+      - name: time
+        description: "時間"
+      - name: ref_single* # Warning: 参照先 'ref_single' の format が 'single'
+        description: "参照先 single"
+
+  table_warning2:
+    descriptions: ["警告2: 参照先 format が binary"]
+    format: table
+    unit: "table"
+    columns:
+      - name: time
+        description: "時間"
+      - name: ref_binary* # Warning: 参照先 'ref_binary' の format が 'binary'
+        description: "参照先 binary"
+
+  table_warning3:
+    descriptions: ["警告3: 参照先 format が document"]
+    format: table
+    unit: "table"
+    columns:
+      - name: time
+        description: "時間"
+      - name: ref_document* # Warning: 参照先 'ref_document' の format が 'document'
+        description: "参照先 document"
