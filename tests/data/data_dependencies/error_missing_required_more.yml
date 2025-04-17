@@ -1,0 +1,24 @@
+metadata:
+  # title: "必須項目欠落テスト (追加)" # Error: title 欠落
+  purposes: # Error: purposes 欠落 (キー自体がない)
+    - "目的"
+target:
+  - data2
+data:
+  data1:
+    # descriptions: ["データ1"] # Error: descriptions 欠落
+    format: single
+    # unit: "-" # Error: unit 欠落
+  data2:
+    descriptions: ["データ2"]
+    format: table
+    unit: "table"
+    columns:
+      - # name: "col1" # Error: name 欠落
+        description: "列1"
+      - name: "col2"
+        # description: "列2" # Error: description 欠落
+parameter:
+  param1:
+    # descriptions: ["パラメータ1"] # Error: descriptions 欠落
+    unit: "-"

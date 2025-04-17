@@ -1,0 +1,7 @@
+metadata:
+  title: "空定義エラーテスト (data空)"
+  purposes:
+    - "data が空辞書の場合のエラー検出"
+target:
+  - some_target # target は空ではないが data が空
+data: {} # Error: data 辞書が空

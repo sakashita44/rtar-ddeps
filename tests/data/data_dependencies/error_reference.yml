@@ -4,7 +4,7 @@ metadata:
     - "参照整合性エラーの検出"
 target:
   - processed_data
-  - final_result # Error: data に定義されていない
+  - final_result # Error: 'data' に 'final_result' が定義されていない
 
 data:
   raw_sensor_data:
@@ -25,9 +25,9 @@ data:
     unit: "V"
     required_data:
       - raw_sensor_data
-      - non_existent_data # Error: data に定義されていない
+      - non_existent_data # Error: 'data' に 'non_existent_data' が定義されていない
     required_parameter:
-      - non_existent_param # Error: parameter に定義されていない
+      - non_existent_param # Error: 'parameter' に 'non_existent_param' が定義されていない (parameter セクション自体も存在しない)
 
   filtered_data:
     descriptions:
@@ -36,7 +36,7 @@ data:
     unit: "V"
     required_data:
       - processed_data
-    required_parameter: # Error: parameter セクションが存在しない
+    required_parameter: # Error: 'parameter' セクションが存在しないのに required_parameter が指定されている
       - filter_threshold
 # parameter: # Error: parameter セクション自体が存在しない
 #   filter_threshold:

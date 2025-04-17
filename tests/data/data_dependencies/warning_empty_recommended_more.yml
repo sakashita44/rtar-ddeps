@@ -1,0 +1,14 @@
+metadata:
+  title: "推奨項目の空定義テスト (terms.descriptions) (Warning)"
+  purposes:
+    - "目的"
+  terms:
+    - name: "用語1"
+      descriptions: [] # Warning: 'terms' 内の 'descriptions' リストが空
+target:
+  - data_a
+data:
+  data_a:
+    descriptions: ["データA"]
+    format: single
+    unit: "-"

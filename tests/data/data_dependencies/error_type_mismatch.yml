@@ -2,11 +2,11 @@ metadata:
   title: "データ型不一致テスト"
   purposes:
     - "データ型のバリデーションエラー検出"
-target: "processed_data" # Error: リストではなく文字列
+target: "processed_data" # Error: リストではなく文字列 (期待される型: list[str])
 
 data:
   raw_data:
-    descriptions: "生データの説明" # Error: リストではなく文字列
+    descriptions: "生データの説明" # Error: リストではなく文字列 (期待される型: list[str])
     format: table
     unit: "-"
     columns:
@@ -20,11 +20,11 @@ data:
       - "処理済みデータ"
     format: time_series
     unit: "V"
-    required_data: "raw_data" # Error: リストではなく文字列
+    required_data: "raw_data" # Error: リストではなく文字列 (期待される型: list[str])
     required_parameter:
       - factor # これはOK
 
 parameter:
   factor:
-    descriptions: "変換係数" # Error: リストではなく文字列
+    descriptions: "変換係数" # Error: リストではなく文字列 (期待される型: list[str])
     unit: "-"
