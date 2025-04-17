@@ -71,7 +71,7 @@ class DataDependenciesValidator(BaseValidator):
         self._validate_references()
         self._validate_uniqueness()
         self._validate_circular_dependencies()
-        # self._validate_variable_columns() # 可変長列チェック (後で追加)
+        self._validate_variable_columns()
 
         # --- 警告チェック ---
         # 警告はバリデーションの成否に影響しない
@@ -185,6 +185,66 @@ class DataDependenciesValidator(BaseValidator):
                 if detect_cycle_util(node):
                     pass
 
+    def _validate_variable_columns(self):
+        """可変長列定義 (*付き列名) のバリデーションルールをチェックする (Error)."""
+        if not isinstance(self.data, dict) or 'data' not in self.data or not isinstance(self.data['data'], dict):
+            return # data セクションがないか, 辞書でない場合はチェック不能
+
+        data_section = self.data['data']
+
+        for data_name, data_def in data_section.items():
+            if not isinstance(data_def, dict) or 'columns' not in data_def or not isinstance(data_def['columns'], list):
+                continue # columns がないかリストでない場合はスキップ
+
+            columns = data_def['columns']
+            for col_index, column_def in enumerate(columns):
+                if not isinstance(column_def, dict):
+                    continue # カラム定義が辞書でない場合はスキップ (スキーマエラー)
+
+                col_path = ['data', data_name, 'columns', col_index]
+                col_name = column_def.get('name')
+                key_source = column_def.get('key_source')
+
+                if not isinstance(col_name, str):
+                    continue # name が文字列でない場合はスキップ (スキーマエラー)
+
+                is_variable = col_name.endswith('*')
+
+                if is_variable:
+                    ref_data_name = col_name[:-1]
+
+                    # Rule 1: 参照先データが存在するか
+                    if ref_data_name not in self._data_keys:
+                        self._add_error(f"Referenced data '{ref_data_name}' for variable column '{col_name}' is not defined in the 'data' section.", col_path + ['name'])
+                        continue # 参照先がないと以降のチェックは無意味
+
+                    ref_data_def = data_section.get(ref_data_name)
+                    if not isinstance(ref_data_def, dict):
+                        # 通常は起こらないはず (data_keys にあるので)
+                        continue
+
+                    ref_format = ref_data_def.get('format')
+
+                    if ref_format == 'table':
+                        # Rule 2: 参照先 format が table なら key_source が必須
+                        if key_source is None:
+                            self._add_error(f"'key_source' is required for variable column '{col_name}' because referenced data '{ref_data_name}' has format 'table'.", col_path)
+                        # Rule 3: key_source で指定された列が参照先テーブルに存在するか
+                        elif isinstance(key_source, str):
+                            ref_columns = ref_data_def.get('columns')
+                            if not isinstance(ref_columns, list) or not any(isinstance(c, dict) and c.get('name') == key_source for c in ref_columns):
+                                self._add_error(f"The column '{key_source}' specified by 'key_source' for variable column '{col_name}' does not exist in the referenced data '{ref_data_name}'.", col_path + ['key_source'])
+                        # else: key_source の型エラーはスキーマで検出
+
+                    else: # 参照先 format が table 以外
+                        # Rule 5: 参照先 format が table 以外なら key_source は指定できない
+                        if key_source is not None:
+                            self._add_error(f"'key_source' cannot be specified for variable column '{col_name}' because referenced data '{ref_data_name}' has format '{ref_format}' (must be 'table').", col_path + ['key_source'])
+
+                else: # is_variable is False (name が * で終わらない)
+                    # Rule 4: name が * で終わらないなら key_source は指定できない
+                    if key_source is not None:
+                        self._add_error(f"'key_source' is specified, but the column name '{col_name}' does not end with '*'.", col_path + ['name'])
 
     def _validate_warnings(self):
         """修正が推奨される項目 (Warning) をチェックする."""
@@ -195,10 +255,20 @@ class DataDependenciesValidator(BaseValidator):
         # metadata の空リストチェック
         if 'purposes' in metadata and isinstance(metadata['purposes'], list) and not metadata['purposes']:
             self._add_warning("`purposes` list is empty. Consider describing the purpose.", ['metadata', 'purposes'])
+        if 'terms' in metadata and isinstance(metadata['terms'], list) and not metadata['terms']: # terms 自体が空リスト
+             self._add_warning("`terms` list is empty. If there are no terms, consider removing the key.", ['metadata', 'terms'])
         if 'note' in metadata and isinstance(metadata['note'], list) and not metadata['note']:
             self._add_warning("`note` list is empty.", ['metadata', 'note'])
 
-        # data の空リストチェックと format チェック
+        # metadata.terms 内の descriptions 空チェック
+        if 'terms' in metadata and isinstance(metadata['terms'], list):
+            for term_index, term_def in enumerate(metadata['terms']):
+                 if isinstance(term_def, dict) and 'descriptions' in term_def and isinstance(term_def['descriptions'], list) and not term_def['descriptions']:
+                     term_name = term_def.get('name', f'index {term_index}')
+                     self._add_warning(f"Term '{term_name}' has an empty `descriptions` list.", ['metadata', 'terms', str(term_index), 'descriptions'])
+
+
+        # data の空リストチェックと可変長列 format チェック
         for data_name, data_def in data_section.items():
             path_base = ['data', data_name]
             if 'descriptions' in data_def and isinstance(data_def['descriptions'], list) and not data_def['descriptions']:
@@ -207,6 +277,22 @@ class DataDependenciesValidator(BaseValidator):
                 self._add_warning("`required_data` list is empty. If there are no dependencies, consider removing the key.", path_base + ['required_data'])
             if 'required_parameter' in data_def and isinstance(data_def['required_parameter'], list) and not data_def['required_parameter']:
                 self._add_warning("`required_parameter` list is empty. If there are no dependencies, consider removing the key.", path_base + ['required_parameter'])
+
+            # Rule 6 (Warning): 可変長列の参照先 format が不適切
+            if isinstance(data_def.get('columns'), list):
+                for col_index, column_def in enumerate(data_def['columns']):
+                    if not isinstance(column_def, dict): continue
+                    col_name = column_def.get('name')
+                    if isinstance(col_name, str) and col_name.endswith('*'):
+                        ref_data_name = col_name[:-1]
+                        if ref_data_name in self._data_keys:
+                            ref_data_def = data_section.get(ref_data_name)
+                            if isinstance(ref_data_def, dict):
+                                ref_format = ref_data_def.get('format')
+                                if ref_format in {'single', 'binary', 'document'}:
+                                    col_path = path_base + ['columns', col_index]
+                                    self._add_warning(f"Variable column '{col_name}' references data '{ref_data_name}' with format '{ref_format}', which might be inappropriate for key-based referencing.", col_path + ['name'])
+
 
         # parameter の空リストチェック
         if isinstance(param_section, dict):
